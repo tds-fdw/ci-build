@@ -1,0 +1,25 @@
+#!/bin/bash
+
+print_error_folder_doesnt_exist() {
+  echo "Folder ${1} does not exist!"
+}
+
+print_error_jail_not_found() {
+  echo "No jail available at ${1}"
+}
+
+print_error_unknown_action() {
+  echo "Unknown action (use -h for help)"
+}
+
+print_error_unknown_unsupported_pgver() {
+  echo "Unknown or not supported PostgreSQL version (use -h for help)"
+}
+
+print_error_unsupported_distro() {
+  echo "Could not find a supported distribution label in labels"
+}
+
+print_incorrect_syntax() {
+  echo "Incorrect syntax (use -h for help)"
+}

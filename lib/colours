@@ -1,0 +1,4 @@
+#!/bin/bash
+
+export PURPLEBOLD='\033[1;35m'
+export COLORCLEAR='\033[0m'

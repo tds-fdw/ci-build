@@ -1,0 +1,50 @@
+#!/bin/bash
+
+check_mssql_vars() {
+  if [ -z "${MSSQLHOST}" -o \
+       -z "${MSSQLPORT}" -o \
+       -z "${MSSQLDB}" -o \
+       -z "${MSSQLUSER}" -o \
+       -z "${MSSQLPASS}" ]; then
+    return 1
+  else
+    return 0
+  fi
+}
+
+check_postgres_vars() {
+  if [ -z "${POSTGRESDB}" -o \
+       -z "${POSTGRESUSER}" -o \
+       -z "${POSTGRESPASS}" ]; then
+    return 1
+  else
+    return 0
+  fi
+}
+
+detect_distro() {
+  local LABEL=""
+  local DISTRO=""
+  for LABEL in ${LABELS}; do
+    for DISTRO in ${SUPPORTEDDISTROS}; do
+      if [ "${LABEL}" == "${DISTRO}" ]; then
+        echo "${DISTRO}"
+        return 0
+      fi
+    done
+  done
+  echo ""
+  return 1
+}
+
+check_pgver() {
+  local SUPPORTEDPGVER=""
+  for SUPPORTEDPGVER in ${SUPPORTEDPGVERS}; do
+    if [ "${PG_VER}" == "${SUPPORTEDPGVER}" ]; then
+      echo "${PG_VER}"
+      return 0
+    fi
+  done
+  echo ""
+  return 1
+}

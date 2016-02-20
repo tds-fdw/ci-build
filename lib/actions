@@ -1,0 +1,150 @@
+#!/bin/bash -e
+
+get_info() {
+  sudo -E /usr/sbin/chroot --userspec=$(id -u):$(id -g) ${CHROOTDIR} /bin/bash +x -e <<'EOF'
+echo -e "${PURPLEBOLD}=================================================================================${COLORCLEAR}"
+echo -e "${PURPLEBOLD}                                    INFO                                         ${COLORCLEAR}"
+echo -e "${PURPLEBOLD}=================================================================================${COLORCLEAR}"
+if [ -f /etc/redhat-release ]; then
+  INFO_RELEASE="$(cat /etc/redhat-release)"
+  PKGVER=$(rpm -qa postgresql${SHORTVER}-server|rev|cut -d '.' -f2,3-|cut -d '-' -f 1,2|rev)
+else
+  INFO_RELEASE="$(cat /etc/debian_version)"
+  PKGVER=$(dpkg -s postgresql-${PG_VER}|grep '^Version:'|cut -d ' ' -f 2)
+fi
+echo "DIST RELEASE: ${INFO_RELEASE}"
+echo "PKG VERSION:  ${PKGVER}"
+EOF
+}
+
+mod_build() {
+  sudo -E /usr/sbin/chroot --userspec=$(id -u):$(id -g) ${CHROOTDIR} /bin/bash +x -e <<'EOF'
+cd ${TDSDIR}
+echo -e "${PURPLEBOLD}=================================================================================${COLORCLEAR}"
+echo -e "${PURPLEBOLD}                                  BUILDING                                       ${COLORCLEAR}"
+echo -e "${PURPLEBOLD}=================================================================================${COLORCLEAR}"
+PATH=${PGBIN_PATH}:${PATH} make USE_PGXS=1
+EOF
+}
+
+mod_install() {
+  sudo -E /usr/sbin/chroot --userspec=$(id -u):$(id -g) ${CHROOTDIR} /bin/bash +x -e <<'EOF'
+cd ${TDSDIR}
+echo -e "${PURPLEBOLD}=================================================================================${COLORCLEAR}"
+echo -e "${PURPLEBOLD}                                 INSTALLING                                      ${COLORCLEAR}"
+echo -e "${PURPLEBOLD}=================================================================================${COLORCLEAR}"
+sudo PATH=${PGBIN_PATH}:${PATH} make USE_PGXS=1 install
+EOF
+}
+
+pg_start() {
+  sudo -E /usr/sbin/chroot --userspec=$(id -u):$(id -g) ${CHROOTDIR} /bin/bash +x -e <<'EOF'
+echo -e "${PURPLEBOLD}=================================================================================${COLORCLEAR}"
+echo -e "${PURPLEBOLD}                                STARTING SERVICE                                 ${COLORCLEAR}"
+echo -e "${PURPLEBOLD}=================================================================================${COLORCLEAR}"
+${SERVICE_START_ORDER}
+if [ -z "${MAXRETRIES}" ]; then
+  MAX_RETRIES=40
+fi
+if [ -z "${WAIT_SEC}" ]; then
+  WAIT_SEC=5
+fi
+RETRIES=0
+echo "Checking if database engine is started..."
+set +e
+sudo -iu postgres ${PGBIN_PATH}/psql -p ${POSTGRESPORT} -e -c 'SELECT version();' &> /dev/null
+while [ $? -eq 2 -a ${RETRIES} -lt ${MAX_RETRIES} ]; do
+  echo "Database engine is starting up. Waiting ${WAIT_SEC} seconds..."
+  sleep ${WAIT_SEC}
+  let "RETRIES++"
+  sudo -iu postgres ${PGBIN_PATH}/psql -p ${POSTGRESPORT} -e -c 'SELECT version();' &> /dev/null
+done
+set -e
+if [ ${RETRIES} -eq ${MAX_RETRIES} ]; then
+  echo "Can't connect to database engine after ${MAX_RETRIES} retries!"
+  exit 1
+else
+  echo "Database engine is started."
+fi
+EOF
+}
+
+pg_stop() {
+  sudo -E /usr/sbin/chroot --userspec=$(id -u):$(id -g) ${CHROOTDIR} /bin/bash +x -e <<'EOF'
+echo -e "${PURPLEBOLD}=================================================================================${COLORCLEAR}"
+echo -e "${PURPLEBOLD}                                STOPPING SERVICE                                 ${COLORCLEAR}"
+echo -e "${PURPLEBOLD}=================================================================================${COLORCLEAR}"
+${SERVICE_STOP_ORDER}
+EOF
+}
+
+pg_confdb() {
+  sudo -E /usr/sbin/chroot --userspec=$(id -u):$(id -g) ${CHROOTDIR} /bin/bash +x -e <<'EOF'
+cd ${TDSDIR}
+echo -e "${PURPLEBOLD}=================================================================================${COLORCLEAR}"
+echo -e "${PURPLEBOLD}                       CONFIGURING DB AND LOADING EXTENSION                      ${COLORCLEAR}"
+echo -e "${PURPLEBOLD}=================================================================================${COLORCLEAR}"
+sudo -iu postgres ${PGBIN_PATH}/psql -p ${POSTGRESPORT} -e -c "SELECT version();"
+sudo -iu postgres ${PGBIN_PATH}/psql -p ${POSTGRESPORT} -e -c "DROP DATABASE IF EXISTS ${POSTGRESDB};"
+sudo -iu postgres ${PGBIN_PATH}/psql -p ${POSTGRESPORT} -e -c "CREATE DATABASE ${POSTGRESDB};"
+sudo -iu postgres ${PGBIN_PATH}/psql -p ${POSTGRESPORT} -e -d ${POSTGRESDB} -c "CREATE EXTENSION tds_fdw;"
+sudo -iu postgres ${PGBIN_PATH}/psql -p ${POSTGRESPORT} -e -d ${POSTGRESDB} -c "\dx tds_fdw"
+sudo -iu postgres ${PGBIN_PATH}/psql -p ${POSTGRESPORT} -e -d ${POSTGRESDB} -c "DROP USER IF EXISTS ${POSTGRESUSER};"
+sudo -iu postgres ${PGBIN_PATH}/psql -p ${POSTGRESPORT} -e -d ${POSTGRESDB} -c "CREATE USER ${POSTGRESUSER} WITH PASSWORD '${POSTGRESPASS}';"
+sudo -iu postgres ${PGBIN_PATH}/psql -p ${POSTGRESPORT} -e -d ${POSTGRESDB} -c "GRANT ALL PRIVILEGES ON DATABASE tds_fdw TO ${POSTGRESUSER};"
+sudo -iu postgres ${PGBIN_PATH}/psql -p ${POSTGRESPORT} -e -d ${POSTGRESDB} -c "GRANT ALL ON FOREIGN DATA WRAPPER tds_fdw TO ${POSTGRESUSER};"
+EOF
+}
+
+mssql_test() {
+  sudo -E /usr/sbin/chroot --userspec=$(id -u):$(id -g) ${CHROOTDIR} /bin/bash +x -e <<'EOF'
+cd ${TDSDIR}/tests
+echo -e "${PURPLEBOLD}=================================================================================${COLORCLEAR}"
+echo -e "${PURPLEBOLD}                                RUNNING MSSQL TESTS                              ${COLORCLEAR}"
+echo -e "${PURPLEBOLD}=================================================================================${COLORCLEAR}"
+PYTHONUNBUFFERED=True ./mssql-tests.py --server ${MSSQLHOST} --port ${MSSQLPORT} --database ${MSSQLDB} --username ${MSSQLUSER} --password ${MSSQLPASS} --schema "${MSSQLSCHEMA}" --azure
+EOF
+}
+
+pg_test() {
+  sudo -E /usr/sbin/chroot --userspec=$(id -u):$(id -g) ${CHROOTDIR} /bin/bash +x -e <<'EOF'
+cd ${TDSDIR}/tests
+echo -e "${PURPLEBOLD}=================================================================================${COLORCLEAR}"
+echo -e "${PURPLEBOLD}                              RUNNING POSTGRESQL TESTS                           ${COLORCLEAR}"
+echo -e "${PURPLEBOLD}=================================================================================${COLORCLEAR}"
+POSTGRESHOST='127.0.0.1'
+PYTHONUNBUFFERED=True ./postgresql-tests.py --mssql_server ${MSSQLHOST} --mssql_port ${MSSQLPORT} --mssql_database tds_fdw_jenkins --mssql_username ${MSSQLUSER} --mssql_password ${MSSQLPASS} --mssql_schema ${MSSQLSCHEMA} --postgres_server ${POSTGRESHOST} --postgres_port ${POSTGRESPORT} --postgres_database ${POSTGRESDB} --postgres_username ${POSTGRESUSER} --postgres_password ${POSTGRESPASS} --postgres_schema ${POSTGRESSCHEMA} --azure
+EOF
+}
+
+pg_dropdb() {
+  sudo -E /usr/sbin/chroot --userspec=$(id -u):$(id -g) ${CHROOTDIR} /bin/bash +x -e <<'EOF'
+echo -e "${PURPLEBOLD}=================================================================================${COLORCLEAR}"
+echo -e "${PURPLEBOLD}                                  DROPPING DB                                    ${COLORCLEAR}"
+echo -e "${PURPLEBOLD}=================================================================================${COLORCLEAR}"
+sudo -iu postgres ${PGBIN_PATH}/psql -p ${POSTGRESPORT} -e -c "DROP DATABASE IF EXISTS ${POSTGRESDB};"
+sudo -iu postgres ${PGBIN_PATH}/psql -p ${POSTGRESPORT} -e -c "DROP USER IF EXISTS ${POSTGRESUSER};"
+EOF
+}
+
+update() {
+  sudo -E /usr/sbin/chroot --userspec=root:root ${CHROOTDIR} /bin/bash +x -e <<'EOF'
+if [ "${DISTRO}" == "centos6" ]; then
+  yum clean all > /dev/null
+  if [ "$(yum check-update; echo ${?})" == "100" ]; then
+    echo "Updating..."
+    yum -y update
+  else
+    echo "No updates needed"
+  fi
+elif [ "${DISTRO}" == "ubuntu12.04" ]; then
+  apt-get update > /dev/null
+  if [ "$(/usr/lib/update-notifier/apt-check 2>&1|cut -d';' -f1)" != "0" ]; then
+    echo "Updating..."
+    apt-get -y upgrade
+  else
+    echo "No updates needed"
+  fi
+fi
+EOF
+}

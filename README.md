@@ -1,6 +1,6 @@
 # tds\_fdw CI build and tests
 
-Script and stuff to build [tds\_fdw](https://github.com/GeoffMontee/tds_fdw) and run tests
+Script to build [tds\_fdw](https://github.com/GeoffMontee/tds_fdw), run tests and perform maintenance.
 
 Run:
 
