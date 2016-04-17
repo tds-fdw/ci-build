@@ -128,15 +128,19 @@ EOF
 }
 
 update() {
-  sudo -E /usr/sbin/chroot --userspec=root:root ${CHROOTDIR} /bin/bash +x -e <<'EOF'
+  sudo -E /usr/sbin/chroot --userspec=root:root ${CHROOTDIR} /bin/bash +x +e <<'EOF'
 if [ "${DISTRO}" == "centos6" ]; then
   yum clean all > /dev/null
-  if [ "$(yum check-update; echo ${?})" == "100" ]; then
-    echo "Updating..."
-    yum -y update
-  else
-    echo "No updates needed"
-  fi
+  YUMLOG=$((yum check-update) 2>&1)
+  YUMRETURN="${?}"
+  case ${YUMRETURN} in
+    100) echo "Updating..."
+         yum -y update;;
+    0)   echo "No updates needed";;
+    *)   echo "An error happened:"
+         echo "${YUMLOG}"
+         exit 1;;
+  esac
 elif [ "${DISTRO}" == "ubuntu12.04" ]; then
   apt-get update > /dev/null
   if [ "$(/usr/lib/update-notifier/apt-check 2>&1|cut -d';' -f1)" != "0" ]; then
