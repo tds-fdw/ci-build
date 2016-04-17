@@ -145,7 +145,10 @@ elif [ "${DISTRO}" == "ubuntu12.04" ]; then
   apt-get update > /dev/null
   if [ "$(/usr/lib/update-notifier/apt-check 2>&1|cut -d';' -f1)" != "0" ]; then
     echo "Updating..."
-    apt-get -y upgrade
+    apt-get -y dist-upgrade
+    if [ ${?} -ne 0 ]; then
+      exit ${?}
+    fi
   else
     echo "No updates needed"
   fi
