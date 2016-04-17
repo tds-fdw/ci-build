@@ -7,13 +7,23 @@ echo -e "${PURPLEBOLD}                                    INFO                  
 echo -e "${PURPLEBOLD}=================================================================================${COLORCLEAR}"
 if [ -f /etc/redhat-release ]; then
   INFO_RELEASE="$(cat /etc/redhat-release)"
-  PKGVER=$(rpm -qa postgresql${SHORTVER}-server|rev|cut -d '.' -f2,3-|cut -d '-' -f 1,2|rev)
+  PKG_POSTGRES_SERVER_VER=$(rpm -qa postgresql${SHORTVER}-server|rev|cut -d '.' -f2,3-|cut -d '-' -f 1,2|rev)
+  PKG_POSTGRES_DEV_VER=$(rpm -qa postgresql${SHORTVER}-devel|rev|cut -d '.' -f2,3-|cut -d '-' -f 1,2|rev)
+  PKG_FREETDS_VER=$(rpm -qa freetds|rev|cut -d '.' -f2,3-|cut -d '-' -f 1,2|rev)
+  PKG_FREETDS_DEV_VER=$(rpm -qa freetds-devel|rev|cut -d '.' -f2,3-|cut -d '-' -f 1,2|rev)
 else
   INFO_RELEASE="$(cat /etc/debian_version)"
-  PKGVER=$(dpkg -s postgresql-${PG_VER}|grep '^Version:'|cut -d ' ' -f 2)
+  PKG_POSTGRES_SERVER_VER=$(dpkg -s postgresql-${PG_VER}|grep '^Version:'|cut -d ' ' -f 2)
+  PKG_POSTGRES_DEV_VER=$(dpkg -s postgresql-server-dev-${PG_VER}|grep '^Version:'|cut -d ' ' -f 2)
+  PKG_FREETDS_VER=$(dpkg -s freetds-bin|grep '^Version:'|cut -d ' ' -f 2)
+  PKG_FREETDS_DEV_VER=$(dpkg -s freetds-dev|grep '^Version:'|cut -d ' ' -f 2)
 fi
 echo "DIST RELEASE: ${INFO_RELEASE}"
-echo "PKG VERSION:  ${PKGVER}"
+echo "**** PACKAGE VERSIONS ****"
+echo "POSTGRESQL-SERVER: ${PKG_POSTGRES_SERVER_VER}"
+echo "POSTGRESQL-DEV:    ${PKG_POSTGRES_DEV_VER}"
+echo "FREETDS:           ${PKG_FREETDS_VER}"
+echo "FREETDS-DEV:       ${PKG_FREETDS_DEV_VER}"
 EOF
 }
 
