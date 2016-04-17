@@ -135,7 +135,11 @@ if [ "${DISTRO}" == "centos6" ]; then
   YUMRETURN="${?}"
   case ${YUMRETURN} in
     100) echo "Updating..."
-         yum -y update;;
+         yum -y update
+         YUMRETURN=${?}
+         if [ ${YUMRETURN} -ne 0 ]; then
+           exit ${YUMRETURN}
+         fi;;
     0)   echo "No updates needed";;
     *)   echo "An error happened:"
          echo "${YUMLOG}"
@@ -146,8 +150,9 @@ elif [ "${DISTRO}" == "ubuntu12.04" ]; then
   if [ "$(/usr/lib/update-notifier/apt-check 2>&1|cut -d';' -f1)" != "0" ]; then
     echo "Updating..."
     apt-get -y dist-upgrade
-    if [ ${?} -ne 0 ]; then
-      exit ${?}
+    APTRETURN=${?}
+    if [ ${APTRETURN} -ne 0 ]; then
+      exit ${APTRETURN}
     fi
   else
     echo "No updates needed"
