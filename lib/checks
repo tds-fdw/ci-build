@@ -23,15 +23,12 @@ check_postgres_vars() {
 }
 
 detect_distro() {
-  local LABEL=""
-  local DISTRO=""
-  for LABEL in ${LABELS}; do
-    for DISTRO in ${SUPPORTEDDISTROS}; do
-      if [ "${LABEL}" == "${DISTRO}" ]; then
-        echo "${DISTRO}"
-        return 0
-      fi
-    done
+  local SUPPORTEDDISTRO=""
+  for SUPPORTEDDISTRO in ${SUPPORTEDDISTROS}; do
+    if [ "${DISTRO}" == "${SUPPORTEDDISTRO}" ]; then
+      echo "${DISTRO}"
+      return 0
+    fi
   done
   echo ""
   return 1

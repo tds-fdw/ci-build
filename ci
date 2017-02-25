@@ -1,10 +1,11 @@
 #!/bin/bash -e
+BASE_DIR=$(dirname "${0}")
 
-source 'lib/actions'
-source 'lib/checks'
-source 'lib/colours'
-source 'lib/help'
-source 'lib/messages'
+source "${BASE_DIR}/lib/actions"
+source "${BASE_DIR}/lib/checks"
+source "${BASE_DIR}/lib/colours"
+source "${BASE_DIR}/lib/help"
+source "${BASE_DIR}/lib/messages"
 
 # Language (force it so getopt messages are always in english, as the script)
 LANG=en_EN
@@ -14,10 +15,10 @@ SCRIPT=$(basename ${0})
 
 # Supported distributions and PostgreSQL versions
 SUPPORTEDDISTROS="centos6 ubuntu12.04"
-SUPPORTEDPGVERS="9.1 9.2 9.3 9.4 9.5 9.6"
+SUPPORTEDPGVERS="9.2 9.3 9.4 9.5 9.6"
 
 # read the options
-ARGS=$(getopt -o h --long help,action:,pgver:,workspace:,labels:,tdsdir:,mssqlhost:,mssqlport:,mssqldb:,mssqluser:,mssqlpass:,postgresdb:,postgresuser:,postgrespass: -n "${SCRIPT}" -- "$@")
+ARGS=$(getopt -o h --long help,action:,distro:,pgver:,tdsdir:,mssqlhost:,mssqlport:,mssqldb:,mssqluser:,mssqlpass:,postgresdb:,postgresuser:,postgrespass: -n "${SCRIPT}" -- "$@")
 if [ $? -ne 0 ];
 then
   print_incorrect_syntax
@@ -28,12 +29,11 @@ eval set -- "${ARGS}"
 # extract options and their arguments into variables
 while true ; do
   case "${1}" in
-    -h|--help)         help "${SUPPORTEDPGVERS}"; exit 1;;
+    -h|--help)         help "${SUPPORTEDPGVERS}" "${SUPPORTEDDISTROS}"; exit 1;;
     --action)       ACTION="${2}"; shift 2;;
+    --distro)       export DISTRO="${2}"; shift 2;;
     --pgver)        export PG_VER="${2}"; shift 2;;
-    --workspace)    export WORKSPACE="${2}"; shift 2;;
     --tdsdir)       export TDSDIR="${2}"; shift 2;;
-    --labels)       export LABELS="${2}"; shift 2;;
     --mssqlhost)    export MSSQLHOST="${2}"; shift 2;;
     --mssqlport)    export MSSQLPORT="${2}"; shift 2;;
     --mssqldb)      export MSSQLDB="${2}"; shift 2;;
@@ -53,7 +53,6 @@ done
 
 # Check arguments for actions
 case "${ACTION}" in
-  update) ;;
   get_info) ;;
   mod_build)  if [ -z "${TDSDIR}" ]; then print_incorrect_syntax; exit 1;
               elif [ ! -d ${TDSDIR} ]; then
@@ -111,32 +110,18 @@ if [ "${DISTRO}" == "" ]; then
 fi
 export SHORTDISTRO="$(echo ${DISTRO}|tr -d '.')"
 
-# Check chroot dir
-CHROOTDIR="/opt/chroot/${DISTRO}/postgres${SHORTVER}"
-if [ ! -d "${CHROOTDIR}" ]; then
-  print_error_jail_not_found "${CHROOTDIR}"
-  exit 1
-fi
-
 # End setting variables to be passed to the jail
 export POSTGRESSCHEMA="postgresql${SHORTVER}_${SHORTDISTRO}_test"
 export MSSQLSCHEMA="${POSTGRESSCHEMA}"
 if [ "${DISTRO}" == "centos6" ]; then
   export PGBIN_PATH="/usr/pgsql-${PG_VER}/bin"
-  export SERVICE_START_ORDER="sudo service postgresql-${PG_VER} start"
-  export SERVICE_STOP_ORDER="sudo service postgresql-${PG_VER} stop"
-  export POSTGRESPORT=$(sudo -E /usr/sbin/chroot --userspec=$(id -u):$(id -g) ${CHROOTDIR} /bin/bash +x -e <<'EOF'
-sudo -iu postgres sed -n 's/^port = \([0-9]*\).*/\1/p' ${CHROOTDIR}/var/lib/pgsql/${PG_VER}/data/postgresql.conf
-EOF
-)
+  export POSTGRESPORT=$(sed -n 's/^port = \([0-9]*\).*/\1/p' /var/lib/pgsql/${PG_VER}/data/postgresql.conf)
 elif [ "${DISTRO}" == "ubuntu12.04" ]; then
   export PGBIN_PATH="/usr/lib/postgresql/${PG_VER}/bin"
-  export SERVICE_START_ORDER="sudo service postgresql start ${PG_VER}"
-  export SERVICE_STOP_ORDER="sudo service postgresql stop ${PG_VER}"
-  export POSTGRESPORT=$(sudo -E /usr/sbin/chroot --userspec=$(id -u):$(id -g) ${CHROOTDIR} /bin/bash +x -e <<'EOF'
-sudo -iu postgres sed -n 's/^port = \([0-9]*\).*/\1/p' ${CHROOTDIR}/etc/postgresql/${PG_VER}/main/postgresql.conf
-EOF
-)
+  export POSTGRESPORT=$(sed -n 's/^port = \([0-9]*\).*/\1/p' /etc/postgresql/${PG_VER}/main/postgresql.conf)
+fi
+if [ "${POSTGRESPORT}" == "" ]; then
+  POSTGRESPORT="5432"
 fi
 
 ${ACTION}

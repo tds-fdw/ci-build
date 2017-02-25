@@ -4,10 +4,6 @@ print_error_folder_doesnt_exist() {
   echo "Folder ${1} does not exist!"
 }
 
-print_error_jail_not_found() {
-  echo "No jail available at ${1}"
-}
-
 print_error_unknown_action() {
   echo "Unknown action (use -h for help)"
 }
@@ -17,7 +13,7 @@ print_error_unknown_unsupported_pgver() {
 }
 
 print_error_unsupported_distro() {
-  echo "Could not find a supported distribution label in labels"
+  echo "Unknown or not supported distribution (use -h for help)"
 }
 
 print_incorrect_syntax() {
