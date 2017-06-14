@@ -14,7 +14,7 @@ LANG=en_EN
 SCRIPT=$(basename ${0})
 
 # Supported distributions and PostgreSQL versions
-SUPPORTEDDISTROS="centos6 ubuntu12.04"
+SUPPORTEDDISTROS="centos6 ubuntu14.04"
 SUPPORTEDPGVERS="9.2 9.3 9.4 9.5 9.6"
 
 # read the options
@@ -116,7 +116,7 @@ export MSSQLSCHEMA="${POSTGRESSCHEMA}"
 if [ "${DISTRO}" == "centos6" ]; then
   export PGBIN_PATH="/usr/pgsql-${PG_VER}/bin"
   export POSTGRESPORT=$(sed -n 's/^port = \([0-9]*\).*/\1/p' /var/lib/pgsql/${PG_VER}/data/postgresql.conf)
-elif [ "${DISTRO}" == "ubuntu12.04" ]; then
+elif [ "${DISTRO}" == "ubuntu14.04" ]; then
   export PGBIN_PATH="/usr/lib/postgresql/${PG_VER}/bin"
   export POSTGRESPORT=$(sed -n 's/^port = \([0-9]*\).*/\1/p' /etc/postgresql/${PG_VER}/main/postgresql.conf)
 fi
