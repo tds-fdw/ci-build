@@ -11,11 +11,13 @@ get_info() {
     PKG_FREETDS_VER=$(rpm -qa freetds|rev|cut -d '.' -f2,3-|cut -d '-' -f 1,2|rev)
     PKG_FREETDS_DEV_VER=$(rpm -qa freetds-devel|rev|cut -d '.' -f2,3-|cut -d '-' -f 1,2|rev)
   elif [ "${DISTRO}" == "ubuntu16.04" ]; then
-    INFO_RELEASE="$(cat /etc/debian_version)"
+    INFO_RELEASE="$(lsb_release -d -s)"
     PKG_POSTGRES_SERVER_VER=$(dpkg -s postgresql-${PG_VER}|grep '^Version:'|cut -d ' ' -f 2)
     PKG_POSTGRES_DEV_VER=$(dpkg -s postgresql-server-dev-${PG_VER}|grep '^Version:'|cut -d ' ' -f 2)
     PKG_FREETDS_VER=$(dpkg -s freetds-common|grep '^Version:'|cut -d ' ' -f 2)
     PKG_FREETDS_DEV_VER=$(dpkg -s freetds-dev|grep '^Version:'|cut -d ' ' -f 2)
+    LLVM_VER=$(dpkg-query -f '${Package}#${Version}\n' -W 'llvm-*'|grep -P '^llvm-\d+\.\d+#.*'|cut -d'#' -f2)
+    CLANG_VER=$(dpkg-query -f '${Package}#${Version}\n' -W 'clang-*'|grep -P '^clang-\d+\.\d+#.*'|cut -d'#' -f2)
   fi
   echo "DIST RELEASE: ${INFO_RELEASE}"
   echo "**** PACKAGE VERSIONS ****"
@@ -23,6 +25,12 @@ get_info() {
   echo "POSTGRESQL-DEV:    ${PKG_POSTGRES_DEV_VER}"
   echo "FREETDS:           ${PKG_FREETDS_VER}"
   echo "FREETDS-DEV:       ${PKG_FREETDS_DEV_VER}"
+  if [ ! -z ${LLVM_VER} ]; then
+      echo "LLVM:              ${LLVM_VER}"
+  fi
+  if [ ! -z ${CLANG_VER} ]; then
+      echo "CLANG:             ${CLANG_VER}"
+  fi
 }
 
 mod_build() {
