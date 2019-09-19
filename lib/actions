@@ -11,7 +11,7 @@ get_info() {
     PKG_FREETDS_VER=$(rpm -qa freetds|rev|cut -d '.' -f2,3-|cut -d '-' -f 1,2|rev)
     PKG_FREETDS_DEV_VER=$(rpm -qa freetds-devel|rev|cut -d '.' -f2,3-|cut -d '-' -f 1,2|rev)
   elif [ "${DISTRO}" == "ubuntu16.04" ]; then
-    INFO_RELEASE="$(lsb_release -d -s)"
+    INFO_RELEASE="$(. /etc/os-release; echo ${VERSION})"
     PKG_POSTGRES_SERVER_VER=$(dpkg -s postgresql-${PG_VER}|grep '^Version:'|cut -d ' ' -f 2)
     PKG_POSTGRES_DEV_VER=$(dpkg -s postgresql-server-dev-${PG_VER}|grep '^Version:'|cut -d ' ' -f 2)
     PKG_FREETDS_VER=$(dpkg -s freetds-common|grep '^Version:'|cut -d ' ' -f 2)
