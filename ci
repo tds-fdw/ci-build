@@ -15,7 +15,7 @@ SCRIPT=$(basename ${0})
 
 # Supported distributions and PostgreSQL versions
 SUPPORTEDDISTROS="centos6 ubuntu16.04"
-SUPPORTEDPGVERS="9.4 9.5 9.6 10 11"
+SUPPORTEDPGVERS="9.4 9.5 9.6 10 11 12-testing"
 
 # read the options
 ARGS=$(getopt -o h --long help,action:,distro:,pgver:,tdsdir:,mssqlhost:,mssqlport:,mssqldb:,mssqluser:,mssqlpass:,postgresdb:,postgresuser:,postgrespass: -n "${SCRIPT}" -- "$@")
@@ -94,13 +94,18 @@ case "${ACTION}" in
      exit 1;
 esac
 
+export PG_VER_FULL="${PG_VER}"
+export SHORTVER_FULL="$(echo ${PG_VER}|tr -d '.')"
+
 # Check PostgreSQL version
 PG_VER="$(check_pgver)"
 if [ "${PG_VER}" == "" ]; then
   print_error_unknown_unsupported_pgver
   exit 1
 fi
-export SHORTVER="$(echo ${PG_VER}|tr -d '.')"
+
+export PG_VER="${PG_VER/-testing}"
+export SHORT_VER="${SHORTVER_FULL/-testing}"
 
 # Check distribution
 export DISTRO="$(detect_distro)"
@@ -111,7 +116,7 @@ fi
 export SHORTDISTRO="$(echo ${DISTRO}|tr -d '.')"
 
 # End setting variables to be passed to the jail
-export POSTGRESSCHEMA="postgresql${SHORTVER}_${SHORTDISTRO}_test"
+export POSTGRESSCHEMA="postgresql${SHORTVER_FULL}_${SHORTDISTRO}_test"
 export MSSQLSCHEMA="${POSTGRESSCHEMA}"
 if [ "${DISTRO}" == "centos6" ]; then
   export PGBIN_PATH="/usr/pgsql-${PG_VER}/bin"

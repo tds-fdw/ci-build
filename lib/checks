@@ -37,8 +37,8 @@ detect_distro() {
 check_pgver() {
   local SUPPORTEDPGVER=""
   for SUPPORTEDPGVER in ${SUPPORTEDPGVERS}; do
-    if [ "${PG_VER}" == "${SUPPORTEDPGVER}" ]; then
-      echo "${PG_VER}"
+    if [ "${PG_VER_FULL}" == "${SUPPORTEDPGVER}" ]; then
+      echo "${PG_VER_FULL}"
       return 0
     fi
   done
