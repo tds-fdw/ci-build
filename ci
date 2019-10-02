@@ -105,7 +105,7 @@ if [ "${PG_VER}" == "" ]; then
 fi
 
 export PG_VER="${PG_VER/-testing}"
-export SHORT_VER="${SHORTVER_FULL/-testing}"
+export SHORTVER="${SHORTVER_FULL/-testing}"
 
 # Check distribution
 export DISTRO="$(detect_distro)"
