@@ -16,8 +16,8 @@ get_info() {
     PKG_POSTGRES_DEV_VER=$(dpkg -s postgresql-server-dev-${PG_VER}|grep '^Version:'|cut -d ' ' -f 2)
     PKG_FREETDS_VER=$(dpkg -s freetds-common|grep '^Version:'|cut -d ' ' -f 2)
     PKG_FREETDS_DEV_VER=$(dpkg -s freetds-dev|grep '^Version:'|cut -d ' ' -f 2)
-    LLVM_VER=$(dpkg-query -f '${Package}#${Version}\n' -W 'llvm-*'|grep -P '^llvm-\d+\.\d+#.*'|cut -d'#' -f2)
-    CLANG_VER=$(dpkg-query -f '${Package}#${Version}\n' -W 'clang-*'|grep -P '^clang-\d+\.\d+#.*'|cut -d'#' -f2)
+    LLVM_VER=$(dpkg-query -f '${Package}#${Version}\n' -W 'llvm-*' 2>/dev/null|grep -P '^llvm-\d+\.\d+#.*'|cut -d'#' -f2)
+    CLANG_VER=$(dpkg-query -f '${Package}#${Version}\n' -W 'clang-*' 2>/dev/null|grep -P '^clang-\d+\.\d+#.*'|cut -d'#' -f2)
   fi
   echo "DIST RELEASE: ${INFO_RELEASE}"
   echo "**** PACKAGE VERSIONS ****"
