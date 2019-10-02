@@ -116,7 +116,7 @@ fi
 export SHORTDISTRO="$(echo ${DISTRO}|tr -d '.')"
 
 # End setting variables to be passed to the jail
-export POSTGRESSCHEMA="postgresql${SHORTVER_FULL}_${SHORTDISTRO}_test"
+export POSTGRESSCHEMA="postgresql${SHORTVER_FULL/-}_${SHORTDISTRO}_test"
 export MSSQLSCHEMA="${POSTGRESSCHEMA}"
 if [ "${DISTRO}" == "centos6" ]; then
   export PGBIN_PATH="/usr/pgsql-${PG_VER}/bin"
