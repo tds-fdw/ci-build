@@ -15,7 +15,7 @@ SCRIPT=$(basename ${0})
 
 # Supported distributions and PostgreSQL versions
 SUPPORTEDDISTROS="centos6 ubuntu16.04"
-SUPPORTEDPGVERS="9.4 9.5 9.6 10 11 12-testing"
+SUPPORTEDPGVERS="9.4 9.5 9.6 10 11 12"
 
 # read the options
 ARGS=$(getopt -o h --long help,action:,distro:,pgver:,tdsdir:,mssqlhost:,mssqlport:,mssqldb:,mssqluser:,mssqlpass:,postgresdb:,postgresuser:,postgrespass: -n "${SCRIPT}" -- "$@")
