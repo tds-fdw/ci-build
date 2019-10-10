@@ -90,6 +90,8 @@ pg_confdb() {
   ${PGBIN_PATH}/psql -p ${POSTGRESPORT} -e -d ${POSTGRESDB} -c '\dx tds_fdw'
   ${PGBIN_PATH}/psql -p ${POSTGRESPORT} -e -d ${POSTGRESDB} -c "DROP USER IF EXISTS ${POSTGRESUSER};"
   ${PGBIN_PATH}/psql -p ${POSTGRESPORT} -e -d ${POSTGRESDB} -c "CREATE USER ${POSTGRESUSER} WITH PASSWORD '${POSTGRESPASS}';"
+  # Required so the user can read data_directory and log_directory from pg_catalog.pg_settings
+  ${PGBIN_PATH}/psql -p ${POSTGRESPORT} -e -d ${POSTGRESDB} -c "ALTER USER ${POSTGRESUSER} WITH SUPERUSER;"
   ${PGBIN_PATH}/psql -p ${POSTGRESPORT} -e -d ${POSTGRESDB} -c "GRANT ALL PRIVILEGES ON DATABASE tds_fdw TO ${POSTGRESUSER};"
   ${PGBIN_PATH}/psql -p ${POSTGRESPORT} -e -d ${POSTGRESDB} -c "GRANT ALL ON FOREIGN DATA WRAPPER tds_fdw TO ${POSTGRESUSER};"
 }
@@ -107,8 +109,11 @@ pg_test() {
   echo -e "${PURPLEBOLD}=================================================================================${COLORCLEAR}"
   echo -e "${PURPLEBOLD}                              RUNNING POSTGRESQL TESTS                           ${COLORCLEAR}"
   echo -e "${PURPLEBOLD}=================================================================================${COLORCLEAR}"
+  if [ "${UNATTENDED_DEBUG}" == "TRUE" ]; then
+    UNATTENDED_DEBUGGING="--unattended_debugging"
+  fi
   POSTGRESHOST='127.0.0.1'
-  PYTHONUNBUFFERED=True ./postgresql-tests.py --mssql_server ${MSSQLHOST} --mssql_port ${MSSQLPORT} --mssql_database tds_fdw_jenkins --mssql_username ${MSSQLUSER} --mssql_password ${MSSQLPASS} --mssql_schema ${MSSQLSCHEMA} --postgres_server ${POSTGRESHOST} --postgres_port ${POSTGRESPORT} --postgres_database ${POSTGRESDB} --postgres_username ${POSTGRESUSER} --postgres_password ${POSTGRESPASS} --postgres_schema ${POSTGRESSCHEMA} --azure
+  PYTHONUNBUFFERED=True ./postgresql-tests.py --mssql_server ${MSSQLHOST} --mssql_port ${MSSQLPORT} --mssql_database tds_fdw_jenkins --mssql_username ${MSSQLUSER} --mssql_password ${MSSQLPASS} --mssql_schema ${MSSQLSCHEMA} --postgres_server ${POSTGRESHOST} --postgres_port ${POSTGRESPORT} --postgres_database ${POSTGRESDB} --postgres_username ${POSTGRESUSER} --postgres_password ${POSTGRESPASS} --postgres_schema ${POSTGRESSCHEMA} --azure ${UNATTENDED_DEBUGGING}
 }
 
 pg_dropdb() {

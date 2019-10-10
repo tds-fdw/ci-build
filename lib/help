@@ -39,5 +39,9 @@ help() {
   echo " --max_retries=<NUMBER OF TIMES TO CHECK IF SERVICES IS STARTED>"
   echo " --wait_sec=<NUMBER OF SECONDS BETWEEN RETRIES>"
   echo ""
+  echo "Optional for pg_test:"
+  echo " --untattended_debug Calls the test script with --unattended_debug more information"
+  echo "                     about each test, and print PostgreSQL logs on-screen"
+  echo ""
   exit 1
 }

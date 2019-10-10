@@ -18,7 +18,7 @@ SUPPORTEDDISTROS="centos6 ubuntu16.04"
 SUPPORTEDPGVERS="9.4 9.5 9.6 10 11 12"
 
 # read the options
-ARGS=$(getopt -o h --long help,action:,distro:,pgver:,tdsdir:,mssqlhost:,mssqlport:,mssqldb:,mssqluser:,mssqlpass:,postgresdb:,postgresuser:,postgrespass: -n "${SCRIPT}" -- "$@")
+ARGS=$(getopt -o h --long help,action:,distro:,pgver:,tdsdir:,mssqlhost:,mssqlport:,mssqldb:,mssqluser:,mssqlpass:,postgresdb:,postgresuser:,postgrespass:,max_retries:,wait_sec:,unattended_debugging -n "${SCRIPT}" -- "$@")
 if [ $? -ne 0 ];
 then
   print_incorrect_syntax
@@ -29,23 +29,24 @@ eval set -- "${ARGS}"
 # extract options and their arguments into variables
 while true ; do
   case "${1}" in
-    -h|--help)         help "${SUPPORTEDPGVERS}" "${SUPPORTEDDISTROS}"; exit 1;;
-    --action)       ACTION="${2}"; shift 2;;
-    --distro)       export DISTRO="${2}"; shift 2;;
-    --pgver)        export PG_VER="${2}"; shift 2;;
-    --tdsdir)       export TDSDIR="${2}"; shift 2;;
-    --mssqlhost)    export MSSQLHOST="${2}"; shift 2;;
-    --mssqlport)    export MSSQLPORT="${2}"; shift 2;;
-    --mssqldb)      export MSSQLDB="${2}"; shift 2;;
-    --mssqluser)    export MSSQLUSER="${2}"; shift 2;;
-    --mssqlpass)    export MSSQLPASS="${2}"; shift 2;;
-    --postgreshost) export POSTGRESHOST="${2}"; shift 2;;
-    --postgresport) export POSTGRESPORT="${2}"; shift 2;;
-    --postgresdb)   export POSTGRESDB="${2}"; shift 2;;
-    --postgresuser) export POSTGRESUSER="${2}"; shift 2;;
-    --postgrespass) export POSTGRESPASS="${2}"; shift 2;;
-    --max_retries)  export MAX_RETRIES="${2}"; shift 2;;
-    --wait_sec)     export WAIT_SEC="${2}"; shift 2;;
+    -h|--help)              help "${SUPPORTEDPGVERS}" "${SUPPORTEDDISTROS}"; exit 1;;
+    --action)               ACTION="${2}"; shift 2;;
+    --distro)               export DISTRO="${2}"; shift 2;;
+    --pgver)                export PG_VER="${2}"; shift 2;;
+    --tdsdir)               export TDSDIR="${2}"; shift 2;;
+    --mssqlhost)            export MSSQLHOST="${2}"; shift 2;;
+    --mssqlport)            export MSSQLPORT="${2}"; shift 2;;
+    --mssqldb)              export MSSQLDB="${2}"; shift 2;;
+    --mssqluser)            export MSSQLUSER="${2}"; shift 2;;
+    --mssqlpass)            export MSSQLPASS="${2}"; shift 2;;
+    --postgreshost)         export POSTGRESHOST="${2}"; shift 2;;
+    --postgresport)         export POSTGRESPORT="${2}"; shift 2;;
+    --postgresdb)           export POSTGRESDB="${2}"; shift 2;;
+    --postgresuser)         export POSTGRESUSER="${2}"; shift 2;;
+    --postgrespass)         export POSTGRESPASS="${2}"; shift 2;;
+    --max_retries)          export MAX_RETRIES="${2}"; shift 2;;
+    --wait_sec)             export WAIT_SEC="${2}"; shift 2;;
+    --unattended_debugging) export UNATTENDED_DEBUG="TRUE"; shift 1;;
     --) shift ; break ;;
     *) print_incorrect_syntax; exit 1;;
   esac
