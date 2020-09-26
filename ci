@@ -122,7 +122,7 @@ export MSSQLSCHEMA="${POSTGRESSCHEMA}"
 if [ "${DISTRO}" == "centos6" ]; then
   export PGBIN_PATH="/usr/pgsql-${PG_VER}/bin"
   export POSTGRESPORT=$(sed -n 's/^port = \([0-9]*\).*/\1/p' /var/lib/pgsql/${PG_VER}/data/postgresql.conf)
-if [ "${DISTRO}" == "centos7" ]; then
+elif [ "${DISTRO}" == "centos7" ]; then
   export PGBIN_PATH="/usr/pgsql-${PG_VER}/bin"
   export POSTGRESPORT=$(sed -n 's/^port = \([0-9]*\).*/\1/p' /var/lib/pgsql/${PG_VER}/data/postgresql.conf)
 elif [ "${DISTRO}" == "ubuntu16.04" ]; then
