@@ -103,7 +103,7 @@ mssql_test() {
   echo -e "${PURPLEBOLD}=================================================================================${COLORCLEAR}"
   echo -e "${PURPLEBOLD}                                RUNNING MSSQL TESTS                              ${COLORCLEAR}"
   echo -e "${PURPLEBOLD}=================================================================================${COLORCLEAR}"
-  PYTHONUNBUFFERED=True ./mssql-tests.py --server ${MSSQLHOST} --port ${MSSQLPORT} --database ${MSSQLDB} --username ${MSSQLUSER} --password ${MSSQLPASS} --schema "${MSSQLSCHEMA}" --azure
+  PYTHONUNBUFFERED=True ${PYTHON} ./mssql-tests.py --server ${MSSQLHOST} --port ${MSSQLPORT} --database ${MSSQLDB} --username ${MSSQLUSER} --password ${MSSQLPASS} --schema "${MSSQLSCHEMA}" --azure
 }
 
 pg_test() {
@@ -115,7 +115,7 @@ pg_test() {
     UNATTENDED_DEBUGGING="--unattended_debugging"
   fi
   POSTGRESHOST='127.0.0.1'
-  PYTHONUNBUFFERED=True ./postgresql-tests.py --mssql_server ${MSSQLHOST} --mssql_port ${MSSQLPORT} --mssql_database tds_fdw_jenkins --mssql_username ${MSSQLUSER} --mssql_password ${MSSQLPASS} --mssql_schema ${MSSQLSCHEMA} --postgres_server ${POSTGRESHOST} --postgres_port ${POSTGRESPORT} --postgres_database ${POSTGRESDB} --postgres_username ${POSTGRESUSER} --postgres_password ${POSTGRESPASS} --postgres_schema ${POSTGRESSCHEMA} --azure ${UNATTENDED_DEBUGGING}
+  PYTHONUNBUFFERED=True ${PYTHON} ./postgresql-tests.py --mssql_server ${MSSQLHOST} --mssql_port ${MSSQLPORT} --mssql_database tds_fdw_jenkins --mssql_username ${MSSQLUSER} --mssql_password ${MSSQLPASS} --mssql_schema ${MSSQLSCHEMA} --postgres_server ${POSTGRESHOST} --postgres_port ${POSTGRESPORT} --postgres_database ${POSTGRESDB} --postgres_username ${POSTGRESUSER} --postgres_password ${POSTGRESPASS} --postgres_schema ${POSTGRESSCHEMA} --azure ${UNATTENDED_DEBUGGING}
 }
 
 pg_dropdb() {
