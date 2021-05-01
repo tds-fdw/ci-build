@@ -14,7 +14,7 @@ LANG=en_EN
 SCRIPT=$(basename ${0})
 
 # Supported distributions and PostgreSQL versions
-SUPPORTEDDISTROS="centos7 ubuntu16.04 ubuntu18.04"
+SUPPORTEDDISTROS="centos7 ubuntu18.04 ubuntu20.04"
 SUPPORTEDPGVERS="9.5 9.6 10 11 12 13"
 
 # read the options
@@ -119,16 +119,10 @@ export SHORTDISTRO="$(echo ${DISTRO}|tr -d '.')"
 # End setting variables to be passed to the jail
 export POSTGRESSCHEMA="postgresql${SHORTVER_FULL/-}_${SHORTDISTRO}_test"
 export MSSQLSCHEMA="${POSTGRESSCHEMA}"
-if [ "${DISTRO}" == "centos6" ]; then
+if [[ "${DISTRO}" =~ ^centos[0-9]$ ]]; then
   export PGBIN_PATH="/usr/pgsql-${PG_VER}/bin"
   export POSTGRESPORT=$(sed -n 's/^port = \([0-9]*\).*/\1/p' /var/lib/pgsql/${PG_VER}/data/postgresql.conf)
-elif [ "${DISTRO}" == "centos7" ]; then
-  export PGBIN_PATH="/usr/pgsql-${PG_VER}/bin"
-  export POSTGRESPORT=$(sed -n 's/^port = \([0-9]*\).*/\1/p' /var/lib/pgsql/${PG_VER}/data/postgresql.conf)
-elif [ "${DISTRO}" == "ubuntu16.04" ]; then
-  export PGBIN_PATH="/usr/lib/postgresql/${PG_VER}/bin"
-  export POSTGRESPORT=$(sed -n 's/^port = \([0-9]*\).*/\1/p' /etc/postgresql/${PG_VER}/main/postgresql.conf)
-elif [ "${DISTRO}" == "ubuntu18.04" ]; then
+elif [[ "${DISTRO}" =~ ^ubuntu[0-9]{2}.[0-9]{2}$ ]]; then
   export PGBIN_PATH="/usr/lib/postgresql/${PG_VER}/bin"
   export POSTGRESPORT=$(sed -n 's/^port = \([0-9]*\).*/\1/p' /etc/postgresql/${PG_VER}/main/postgresql.conf)
 fi

@@ -4,13 +4,15 @@ get_info() {
   echo -e "${PURPLEBOLD}=================================================================================${COLORCLEAR}"
   echo -e "${PURPLEBOLD}                                    INFO                                         ${COLORCLEAR}"
   echo -e "${PURPLEBOLD}=================================================================================${COLORCLEAR}"
-  if [ "${DISTRO}" == "centos6" ]; then
+  if [[ "${DISTRO}" =~ ^centos[0-9]$ ]]; then
     INFO_RELEASE="$(cat /etc/redhat-release)"
     PKG_POSTGRES_SERVER_VER=$(rpm -qa postgresql${SHORTVER}-server|rev|cut -d '.' -f2,3-|cut -d '-' -f 1,2|rev)
     PKG_POSTGRES_DEV_VER=$(rpm -qa postgresql${SHORTVER}-devel|rev|cut -d '.' -f2,3-|cut -d '-' -f 1,2|rev)
     PKG_FREETDS_VER=$(rpm -qa freetds|rev|cut -d '.' -f2,3-|cut -d '-' -f 1,2|rev)
     PKG_FREETDS_DEV_VER=$(rpm -qa freetds-devel|rev|cut -d '.' -f2,3-|cut -d '-' -f 1,2|rev)
-  elif [ "${DISTRO}" == "ubuntu16.04" ]; then
+    LLVM_VER=$(rpm -qa llvm[0-9].[0-9]|rev|cut -d '.' -f2,3-|cut -d '-' -f 1,2|rev)
+    CLANG_VER=$(rpm -qa llvm-toolset-[0-9]-clang|rev|cut -d '.' -f2,3-|cut -d '-' -f 1,2|rev)
+  elif [[ "${DISTRO}" =~ ^ubuntu[0-9]{2}.[0-9]{2}$ ]]; then
     INFO_RELEASE="$(. /etc/os-release; echo ${VERSION})"
     PKG_POSTGRES_SERVER_VER=$(dpkg -s postgresql-${PG_VER}|grep '^Version:'|cut -d ' ' -f 2)
     PKG_POSTGRES_DEV_VER=$(dpkg -s postgresql-server-dev-${PG_VER}|grep '^Version:'|cut -d ' ' -f 2)
