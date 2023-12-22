@@ -15,7 +15,10 @@ SCRIPT=$(basename ${0})
 
 # Supported distributions and PostgreSQL versions
 SUPPORTEDDISTROS="centos7 rockylinux8 ubuntu18.04 ubuntu20.04"
-SUPPORTEDPGVERS="9.6 10 11 12 13 14 15"
+SUPPORTEDPGVERS="9.6 10 11 12 13 14 15 16"
+
+# Ignored combinations, will exit without errors so the CI does not fail
+IGNOREDCOMBINATIONS="centos7|16"
 
 # read the options
 ARGS=$(getopt -o h --long help,action:,distro:,pgver:,tdsdir:,mssqlhost:,mssqlport:,mssqldb:,mssqluser:,mssqlpass:,postgresdb:,postgresuser:,postgrespass:,max_retries:,wait_sec:,unattended_debugging -n "${SCRIPT}" -- "$@")
@@ -115,6 +118,15 @@ if [ "${DISTRO}" == "" ]; then
   exit 1
 fi
 export SHORTDISTRO="$(echo ${DISTRO}|tr -d '.')"
+
+for IGNOREDCOMBINATION in ${IGNOREDCOMBINATIONS}; do
+  IGNOREDDISTRO=$(echo ${IGNOREDCOMBINATION}|cut -d'|' -f1)
+  IGNOREDVER=$(echo ${IGNOREDCOMBINATION}|cut -d'|' -f2)
+  if [ "${IGNOREDDISTRO}" == "${DISTRO}" ] && [ "${IGNOREDVER}" == "${PG_VER}" ]; then
+    echo "${IGNOREDDISTRO} with PostgreSQL ${IGNOREDVER} is not available"
+    exit 0
+  fi
+done
 
 # End setting variables to be passed to the jail
 export POSTGRESSCHEMA="postgresql${SHORTVER_FULL/-}_${SHORTDISTRO}_test"
