@@ -14,7 +14,7 @@ LANG=en_EN
 SCRIPT=$(basename ${0})
 
 # Supported distributions and PostgreSQL versions
-SUPPORTEDDISTROS="centos7 rockylinux8 ubuntu18.04 ubuntu20.04"
+SUPPORTEDDISTROS="centos7 rockylinux8 ubuntu18.04 ubuntu20.04 opensuseleap15.5"
 SUPPORTEDPGVERS="9.6 10 11 12 13 14 15 16"
 
 # Ignored combinations, will exit without errors so the CI does not fail
@@ -132,6 +132,9 @@ done
 export POSTGRESSCHEMA="postgresql${SHORTVER_FULL/-}_${SHORTDISTRO}_test"
 export MSSQLSCHEMA="${POSTGRESSCHEMA}"
 if [[ "${DISTRO}" =~ ^(centos|rockylinux)[0-9]$ ]]; then
+  export PGBIN_PATH="/usr/pgsql-${PG_VER}/bin"
+  export POSTGRESPORT=$(sed -n 's/^port = \([0-9]*\).*/\1/p' /var/lib/pgsql/${PG_VER}/data/postgresql.conf)
+elif [[ "${DISTRO}" =~ ^(opensuseleap)[0-9]{2}.[0-9]+$ ]]; then
   export PGBIN_PATH="/usr/pgsql-${PG_VER}/bin"
   export POSTGRESPORT=$(sed -n 's/^port = \([0-9]*\).*/\1/p' /var/lib/pgsql/${PG_VER}/data/postgresql.conf)
 elif [[ "${DISTRO}" =~ ^ubuntu[0-9]{2}.[0-9]{2}$ ]]; then
