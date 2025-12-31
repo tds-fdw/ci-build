@@ -30,6 +30,10 @@ get_info() {
     CLANG_VER=$(dpkg-query -f '${Package}#${Version}\n' -W 'clang-*' 2>/dev/null|grep -P '^clang-\d+\.\d+#.*'|cut -d'#' -f2)
   fi
   echo "DIST RELEASE: ${INFO_RELEASE}"
+  echo "**** DEBUGGING INFO ****"
+  echo "TDS_FDW_MSG_HANDLER:   ${TDS_FDW_MSG_HANDLER}"
+  echo "POSTGRES_MIN_MESSAGES: ${POSTGRES_MIN_MESSAGES}"
+  echo "UNATTENDED_DEBUG: ${UNATTENDED_DEBUG}"
   echo "**** PACKAGE VERSIONS ****"
   echo "POSTGRESQL-SERVER: ${PKG_POSTGRES_SERVER_VER}"
   echo "POSTGRESQL-DEV:    ${PKG_POSTGRES_DEV_VER}"
