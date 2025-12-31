@@ -123,7 +123,7 @@ pg_test() {
     UNATTENDED_DEBUGGING="--unattended_debugging"
   fi
   POSTGRESHOST='127.0.0.1'
-  PYTHONUNBUFFERED=True ${PYTHON} ./postgresql-tests.py --mssql_server ${MSSQLHOST} --mssql_port ${MSSQLPORT} --mssql_database tds_fdw_jenkins --mssql_username ${MSSQLUSER} --mssql_password ${MSSQLPASS} --mssql_schema ${MSSQLSCHEMA} --postgres_server ${POSTGRESHOST} --postgres_port ${POSTGRESPORT} --postgres_database ${POSTGRESDB} --postgres_username ${POSTGRESUSER} --postgres_password ${POSTGRESPASS} --postgres_schema ${POSTGRESSCHEMA} --azure ${UNATTENDED_DEBUGGING}
+  PYTHONUNBUFFERED=True ${PYTHON} ./postgresql-tests.py --mssql_server ${MSSQLHOST} --mssql_port ${MSSQLPORT} --mssql_database tds_fdw_jenkins --mssql_username ${MSSQLUSER} --mssql_password ${MSSQLPASS} --mssql_schema ${MSSQLSCHEMA} --postgres_server ${POSTGRESHOST} --postgres_port ${POSTGRESPORT} --postgres_database ${POSTGRESDB} --postgres_username ${POSTGRESUSER} --postgres_password ${POSTGRESPASS} --postgres_schema ${POSTGRESSCHEMA} --tds_fdw_msg_handler="${TDS_FDW_MSG_HANDLER}" --postgres_min_messages="${POSTGRES_MIN_MESSAGES}" --azure ${UNATTENDED_DEBUGGING}
 }
 
 pg_dropdb() {
